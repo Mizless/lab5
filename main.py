@@ -64,7 +64,6 @@ try:
     print("\nМатрица F:\n", F)
 
     G = np.tril(A, k=0)
-    print(G)
 
     if np.linalg.det(A) == 0 or np.linalg.det(F) == 0:
         print("\nМатрица A или F вырождена. Вычисления не возможны.\n")

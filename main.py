@@ -7,7 +7,6 @@
 
 import random
 import time
-import os
 import numpy as np
 
 def IsPrime(k):
@@ -22,9 +21,7 @@ def IsPrime(k):
 print("\n----Результат работы программы----\n ----Локальное время", time.ctime(), "----")
 
 try:
-    row_q = int(input("Введите четное количество строк(столбцов) квадратной матрицы > 3 и < 184: "))
-    while row_q < 4 or row_q > 184 or row_q % 2 == 1:
-        row_q = int(input("Введите четное количество строк(столбцов) квадратной матрицы > 3 и < 184: "))
+    row_q = int(input("Введите количество строк(столбцов) квадратной матрицы: "))
     K = int(input("Введите число K = "))
     start = time.time()
     A = np.zeros((row_q, row_q), dtype = int)
@@ -39,7 +36,7 @@ try:
     F = np.copy(A)   #   формируем матрицу F
     print("Матрица F:\n", F)
 
-    C = np.zeros((row_q // 2, row_q // 2))   #   формируем матрицу C
+    C = np.zeros((row_q // 2, row_q // 2), dtype = int)   #   формируем матрицу C
     for i in range(row_q // 2):
         for j in range(row_q // 2):
             C[i][j] = F[i][row_q // 2 + (row_q % 2) + j]
@@ -63,29 +60,26 @@ try:
                 F[i][j], F[i][row_q // 2 + row_q % 2 + j] = F[i][row_q // 2 + row_q % 2 + j], F[i][j]
     print("\nМатрица F:\n", F)
 
-    G = np.tril(A, k = 0)
+    try:
+        if np.linalg.det(A) > np.trace(F):
+            print("\n---(A-1 * AT – K * F)---\n", (np.transpose(A) * np.linalg.inv(A)) - F * K) # 1 формула A-1 * AT – K * F
+            A = (np.transpose(A) * np.linalg.inv(A)) - F * K
 
-    if np.linalg.det(A) == 0 or np.linalg.det(F) == 0:
-        print("\nМатрица A или F вырождена. Вычисления не возможны.\n")
+        else:
+            print("\n---(AТ + G-1 - F-1) * K---\n", (np.transpose(A) + np.linalg.inv(np.tril(A, k = 0)) - np.linalg.inv(F)) * K)
+            A = (np.transpose(A) + np.linalg.inv(np.tril(A, k = 0)) - np.linalg.inv(F)) * K      # 2 формула (AТ +G-1-F-1)*K
 
-    elif np.linalg.det(A) > np.trace(F):
-        A = ((A.dot(np.linalg.inv(A), np.transpose(A))) - K * F)       # 1 формула A-1 * AT – K * F
-
-    else:
-        print("\n---Матрица A---")
-        print(np.tril(A))
-        A = (np.transpose(A) + np.linalg.inv(G) - np.linalg.inv(F)) * K      # 2 формула (AТ +G-1-F-1)*K
-
-    print("\n---Ответ---")
-    for i in A: # перебор всех строк матрицы
-        for j in i: # перебор всех элементов в строке
-            print("%5d" % j, end = ' ')
-        print()
+        print("\n---Ответ---")
+        for i in A: # перебор всех строк матрицы
+            for j in i: # перебор всех элементов в строке
+                print("%5d" % j, end = ' ')
+            print()
+    except np.linalg.LinAlgError:
+        print('\nОдна из матриц является вырожденной, вычисления невозможны.')
 
     finish = time.time()
     result = finish - start
     print("\nВремя работы программы: " + str(result) + " seconds.")
 
 except ValueError:
-    print("\nЭто не число.")
-
+    print("\nДанные введены неверно.")
